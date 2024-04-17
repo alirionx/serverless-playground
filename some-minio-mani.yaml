@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: some-minio
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: some-minio 
+  serviceName: "some-minio-service"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: some-minio 
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: some-minio
+        image: quay.io/minio/minio
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9001
+          name: webui
+        args:
+        - server
+        - /data
+        - --console-address
+        - :9001
+        env:
+        - name: MINIO_ROOT_USER
+          value: minio
+        - name: MINIO_ROOT_PASSWORD
+          value: Oviss1234!
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: minio-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      # storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 4Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: some-minio-service
+  namespace: default
+spec:
+  selector:
+    app: some-minio
+  type: LoadBalancer
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: api
+    protocol: TCP
+    port: 9000
+    targetPort: api 
+  - name: webui
+    protocol: TCP
+    port: 9001
+    targetPort: webui 
+    
+
