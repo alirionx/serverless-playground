@@ -1,0 +1,41 @@
+apiVersion: fission.io/v1
+kind: Environment
+metadata:
+  name: go-image-tagger
+  namespace: default
+spec:
+  builder:
+    command: build
+    container:
+      name: ""
+      resources: {}
+      env:
+      - name: http_proxy
+        value: "http://10.0.2.2:3128"
+      - name: https_proxy
+        value: "http://10.0.2.2:3128"
+      - name: no_proxy
+        value: "127.0.0.1,localhost,172.18.0.0/16,192.168.0.0/16,.local"
+    image: fission/go-builder-1.17
+  imagepullsecret: ""
+  poolsize: 1
+  resources: {}
+  runtime:
+    container:
+      env:
+      - name: MINIO_ENDPOINT
+        value: some-minio-service.default:9000
+      - name: MINIO_USE_SSL
+        value: "false"
+      - name: MINIO_ACCESS_KEY
+        value: minio
+      - name: MINIO_SECRET_KEY
+        value: Oviss1234!
+      - name: MINIO_BUCKET
+        value: img-tagger
+      - name: MINIO_REGION
+        value: local
+      name: ""
+      resources: {}
+    image: fission/go-env-1.17
+  version: 2

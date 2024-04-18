@@ -1,0 +1,15 @@
+FROM python:3.11 AS build
+WORKDIR /app
+COPY . ./
+RUN apt update && apt install -y patchelf
+RUN pip install -r requirements.txt
+RUN pip install nuitka
+RUN python -m nuitka --onefile app.py
+
+
+FROM ubuntu:jammy
+ENV PYTHONUNBUFFERED True
+WORKDIR /app
+RUN cd /app
+COPY --from=build /app/app.bin /app/app.bin
+CMD ["/app/app.bin"]

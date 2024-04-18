@@ -1,0 +1,43 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: crud-example-python
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/max-scale: "3"
+    spec:
+      containers:
+        - image: ghcr.io/alirionx/crud-example-python:latest
+          ports:
+            - containerPort: 5000
+          env:
+          - name: DATA_BACKEND
+            value: couchdb
+          - name: COUCHDB_CONNECTION_STRING
+            value: "http://couchdb:couchdb@couchdb.default.svc.cluster.local/"
+
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: couchdb
+  labels:
+    networking.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/max-scale: "1"
+    spec:
+      containers:
+        - image: couchdb:latest
+          ports:
+            - containerPort: 5984
+          env:
+          - name: COUCHDB_USER
+            value: couchdb
+          - name: COUCHDB_PASSWORD
+            value: couchdb

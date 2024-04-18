@@ -1,0 +1,27 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: image-tagger-go
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/max-scale: "3"
+    spec:
+      containers:
+        - image: ghcr.io/alirionx/image-tagger-go:latest
+          ports:
+            - containerPort: 8080
+          env:
+          - name: MINIO_ENDPOINT
+            value: 192.168.10.20:9000
+          - name: MINIO_USE_SSL
+            value: "false"
+          - name: MINIO_ACCESS_KEY
+            value: s878p0pL2H8zVYrUpVnU
+          - name: MINIO_SECRET_KEY
+            value: NitO8SaA7FCs7wg77mkGEDuQSsHRZq46u256R4te
+          - name: MINIO_BUCKET
+            value: img-tagger
+          - name: MINIO_REGION
+            value: local
